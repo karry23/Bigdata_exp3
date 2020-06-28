@@ -1,4 +1,7 @@
 import org.apache.spark._
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.SparkConf
 object PageRank {
   def rank(sc: SparkContext, inputPath: String) = {
     val inputFile = sc.textFile(inputPath)
@@ -16,11 +19,11 @@ object PageRank {
       //reduceByKey将同key的入边pr全部累加，并通过mapValues实现随机浏览模型
       ranks = cont.reduceByKey((x,y) => x+y).mapValues { v => 0.15 + 0.85 * v }
     }
-    ranks.map(p => (p._1,p._2.formatted("%.10f"))).sortBy(_._2,false).saveAsTextFile("/home/hadoop/page_rank_result")
+    ranks.map(p => (p._1,p._2.formatted("%.10f"))).sortBy(_._2,false).saveAsTextFile("file:///usr/local/spark/PageRankOut")
   }
   def main(args: Array[String]): Unit = {
-    val inputPath = "hdfs://localhost:9000/exp3/input/DataSet.txt"
-    val conf = new SparkConf().setAppName("hdfs://localhost:9000/exp2/output");
+    val inputPath = "file:///usr/local/spark/DataSet.txt"
+    val conf = new SparkConf().setAppName("PageRank");
     val sc = new SparkContext(conf)
     rank(sc,inputPath)
   }
